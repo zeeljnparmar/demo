@@ -1,9 +1,9 @@
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn ,ManyToOne, OneToOne, JoinColumn, OneToMany, DeleteDateColumn ,CreateDateColumn, UpdateDateColumn} from 'typeorm';
+import { Entity,Column,PrimaryGeneratedColumn,OneToMany} from 'typeorm';
 import {Property} from './property.entity'
 import { Units } from './unit.entity'; 
 import { Bookings } from './booking.entity';
 
-@Entity('tenants')
+@Entity()
 export class User {
 
   @PrimaryGeneratedColumn()
@@ -27,7 +27,7 @@ export class User {
   @Column({ name: 'rera', nullable:false ,unique:true})
   rera: string;
 
-  @Column({ name: 'comapny', nullable:false})
+  @Column({ name: 'company', nullable:false})
   company: string;
 
   @Column({ name: 'password', nullable:false})

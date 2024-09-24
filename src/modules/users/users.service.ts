@@ -15,17 +15,93 @@ export class UsersService {
     ){}
 
     async getAllUsers():Promise<any>{
-        let data = await this.userDatasource.manager.query(`select * from tenants`);
-        console.log(data);
+        let data = await this.userDatasource.manager.query(`select * from public.user`);
         return data;
     }
 
     async createUser(user: userDto):Promise<any>{
-        let check = await this.userCheck.checkUserDetails(user.name,user.email,user.contact);
+
+        //? Validating user data
+        let check = await this.userCheck.checkUserDetails(user.name,user.email,user.contact,user.rera);
         if (check==='error'){
             return 'user already Exists';
-        }else{
-            return 'To be Continue';
         }
+        try {
+            await this.userDatasource.manager.query(
+                `insert into public.user
+                (
+                    name,email,contact,gender,address,rera,company,password,designation
+                )
+                values(
+                    '${user.name}',
+                    '${user.email}',
+                    ${user.contact},
+                    '${user.gender}',
+                    '${user.address}',
+                    '${user.rera}',
+                    '${user.company}',
+                    '${user.password}',
+                    '${user.designation}'
+                )`
+            )
+            return {
+                status:201,
+                message:'User Created Successfully'
+            }
+        } catch (error) {
+            console.log(error);
+            return{
+                status:200,
+                message:'Unexpected Error has occured'
+            }                        
+        }
+    }
+
+    async getSingleUser(req:any){
+        try {
+            let data= await this.userDatasource.manager.query(`
+                select * from public.user
+                where name ~*$1 
+                or email ~* $2 
+                or id = $3
+                or company ~* $4  
+            `,[req.name,req.email,req.id,req.company])
+            if(data.length==0){
+                return{
+                    status:200,
+                    message:"Data Not found"
+                }
+            }
+            return {
+                status:200,
+                data:data,
+                message:"User found"
+            }
+        } catch (error) {
+            return {
+                status:201,
+                message:error
+                
+            }
+        }
+    }
+
+    async login(req:any){
+        if(!req.password){
+            return 'NO Password Error'
+        }
+        let data= await this.userDatasource.manager.query(`
+            select password from public.user
+            where name = $1 
+            or email =  $2 
+            or contact = $3
+        `,[req.name,req.email,req.number])
+        if(data.length===0){
+            return 'user not found'
+        }
+        if(data[0].password===req.password){
+            return 'Authorise'
+        }
+        return 'UnAuthorized';
     }
 }

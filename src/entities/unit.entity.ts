@@ -3,7 +3,7 @@ import {User} from  './user.entity'
 import {Property} from  './property.entity'
 import { Bookings } from './booking.entity';
 
-@Entity('units')
+@Entity()
 export class Units {
 
   @PrimaryGeneratedColumn()

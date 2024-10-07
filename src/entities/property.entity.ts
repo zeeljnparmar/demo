@@ -15,9 +15,14 @@ export class Property {
   @Column({ name: 'description', nullable:false , unique:true})
   description: string;
 
-  @Column({ name: 'is_Active', nullable:false,default:true})
-  is_Active: boolean;
+  @Column({name:'status',nullable:true,default:'Upcoming'})
+  status:string
 
+  @Column({ name: 'isactive', nullable:false,default:true})
+  isActive: boolean;
+
+  @Column({name:'tenant',default:'AHM001'})
+  teant:string;
 
   @ManyToOne(() => User, (user) => user.properties)
   @JoinColumn({ name: 'user_id' })

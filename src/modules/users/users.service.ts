@@ -3,6 +3,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager, QueryRunner } from 'typeorm';
 import {userDto} from '../../dtos/user.dto'
 import {userCheckService} from './user.check'
+import * as bcrypt from 'bcrypt';
+import {JwtService} from "@nestjs/jwt";
+import {jwt} from '../../constants/constants'
+import { AppService } from 'src/app.service';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +16,11 @@ export class UsersService {
 
         @Inject(forwardRef(() => userCheckService))
         private userCheck: userCheckService,
+
+        @Inject(AppService)
+        private service: AppService,
+
+        private jwtService: JwtService
     ){}
 
     async getAllUsers():Promise<any>{
@@ -27,6 +36,7 @@ export class UsersService {
             return 'user already Exists';
         }
         try {
+            let hashed = await bcrypt.hash(user.password,10);
             await this.userDatasource.manager.query(
                 `insert into public.user
                 (
@@ -40,8 +50,8 @@ export class UsersService {
                     '${user.address}',
                     '${user.rera}',
                     '${user.company}',
-                    '${user.password}',
-                    '${user.designation}'
+                    '${hashed}',
+                    '${user.designation}'    
                 )`
             )
             return {
@@ -91,17 +101,19 @@ export class UsersService {
             return 'NO Password Error'
         }
         let data= await this.userDatasource.manager.query(`
-            select password from public.user
+            select password,isapproved,id,name,rera,designation from public.user
             where name = $1 
             or email =  $2 
             or contact = $3
         `,[req.name,req.email,req.number])
         if(data.length===0){
-            return 'user not found'
+            return this.service.sendResponse(400,'user Not found')
         }
-        if(data[0].password===req.password){
-            return 'Authorise'
+        if( await bcrypt.compare(req.password,data[0].password) && data[0].isapproved===true){
+            delete data[0].password;
+            delete data[0].isapproved;
+            return this.service.sendResponse(201,'user Found',await this.jwtService.signAsync(data[0],{secret:jwt}))
         }
-        return 'UnAuthorized';
+        return this.service.sendResponse(200,'user UnAuthorized')
     }
 }

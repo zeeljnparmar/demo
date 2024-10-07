@@ -1,5 +1,5 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import {DB_HOST,DB_PASSWORD,DB_PORT,DB_USER} from '../env.constant'
+import {DB_HOST,DB_PASSWORD,DB_PORT,DB_USER} from '../constants/constants'
 import {User} from '../entities/user.entity'
 import {Property} from '../entities/property.entity'
 import {Units} from '../entities/unit.entity'
@@ -10,8 +10,8 @@ export const nestpractice:TypeOrmModuleOptions={
     type:'postgres',
     host:DB_HOST,
     port:parseInt(DB_PORT),
-    username:'nestpractice',
-    password:'nezfur@357',
+    username:DB_USER,
+    password:DB_PASSWORD,
     database:'postgres',
     synchronize:true,
     logging:true,

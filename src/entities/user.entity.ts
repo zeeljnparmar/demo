@@ -24,7 +24,7 @@ export class User {
   @Column({ name: 'address', nullable:false })
   address: string;
 
-  @Column({ name: 'rera', nullable:false ,unique:true})
+  @Column({ name: 'rera', nullable:false})
   rera: string;
 
   @Column({ name: 'company', nullable:false})
@@ -33,8 +33,14 @@ export class User {
   @Column({ name: 'password', nullable:false})
   password: string;
 
-  @Column({ name: 'designation', nullable:false})
+  @Column({ name: 'designation', nullable:true,default:'Broker'})
   designation: string;
+
+  @Column({name:'isapproved',nullable:true,default:false})
+  isApproved:boolean;
+
+  @Column({name:'tenant',default:'AHM001'})
+  teant:string;
 
   @OneToMany(() => Property, (property) => property.user)
   properties: Property[];

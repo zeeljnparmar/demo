@@ -12,21 +12,27 @@ export class Units {
   @Column({ name: 'type', nullable:false })
   type: string;
 
-  @Column({ name: 'block', nullable:false , unique:true})
+  @Column({ name: 'block', nullable:false})
   block: string;
 
-  @Column({ name: 'floor', nullable:false , unique:true})
+  @Column({ name: 'floor', nullable:false})
   floor: string;
 
-  @Column({ name: 'unit_no', nullable:false , unique:true})
+  @Column({ name: 'unit_no', nullable:false})
   unit_no: string;
 
-  @Column({ name: 'unit_size', nullable:false , unique:true})
+  @Column({ name: 'unit_size', nullable:false})
   unit_size: string;
 
-  @Column({ name: 'is_Active', nullable:false,default:true})
-  is_Active: boolean;
+  @Column({name:'status', default:'Sale'})
+  status:string
+  
+  @Column({ name: 'isactive', nullable:false,default:true})
+  isactive: boolean;
 
+  @Column({name:'tenant',default:'AHM001'})
+  teant:string;
+  
   @ManyToOne(() => User, (user) => user.units)
   @JoinColumn({ name: 'user_id' })
   user: User;

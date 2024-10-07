@@ -23,4 +23,13 @@ export class userCheckService{
         }
         return 'success'
     }
+    async checById(id:number){
+        let user = await this.userDatasource.manager.query(`
+                select designation from public.user where id=$1  
+        `,[id]);
+        if(user.length>0){
+            return user[0].designation;
+        }
+        return 'user not found';
+    }
 }

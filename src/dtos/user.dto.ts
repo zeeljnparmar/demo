@@ -54,3 +54,11 @@ export class userDto {
     designation : string
 
 }
+
+export class User {
+    tenant_id: string;
+    org_id: string;
+    user_id: string;
+    request_source ?: string;
+    id?:string;
+}

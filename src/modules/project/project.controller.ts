@@ -1,25 +1,29 @@
-import { Body, Controller, Post ,Req} from '@nestjs/common';
+import { Body, Controller, Post ,Req, UseInterceptors} from '@nestjs/common';
 import {ProjectService} from './project.service'
-import {projectDto} from '../../dtos/project.dto'
+import {projectDto,insertunit,unitDto} from '../../dtos/project.dto'
 import {  ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {Response, Request} from 'express';
+import {userInterceptor} from '../validations/user.interceptor';
+import { ppid } from 'process';
 
 @ApiTags('Projects')
 @Controller('project')
+@UseInterceptors(userInterceptor)
 export class ProjectController {
-
     constructor(
         private readonly project:ProjectService
     ) {}
 
     //?=================for User===========================//
-    @Post('view')
+    @Post('view-all')
     private async viewAll(){
-        
+        return await this.project.viewAllProject();
     }
     @Post('view')
-    private async viewProject(@Body() body:{id:number}){
-        return this.project.viewAProject(body.id);
+    @ApiOperation({ summary: '' })
+    @ApiResponse({ status: 201, type: 'abcd' })
+    private async viewProject(@Body() body){
+        return await this.project.viewAProject(body.id);
     }
     //?=================for Admin===========================//
     @Post('create')
@@ -27,11 +31,32 @@ export class ProjectController {
     @ApiResponse({ status: 201, type: 'abcd' })
     private async createProject(
         @Body() body:projectDto,
-        @Req() request:Request
     ){
-        const cookie = request.cookies;
-        console.log(cookie);
-        //return await this.project.createProject(body);
+        return await this.project.createProject(body);
+    }
+    @Post('insert-unit')
+    @ApiOperation({ summary: '' })
+    @ApiResponse({ status: 201, type: 'abcd' })
+    private async insertUnits(
+        @Body() body:insertunit        
+    ){
+        return await this.project.insertUnits(body);
+    }
+    @Post('update-unit')
+    @ApiOperation({summary:''})
+    @ApiResponse({ status: 201})
+    private async updateUnit(
+        @Body() body:any
+    ){
+        return await this.project.updateUnit(body);
+    }
+    @Post('delete-unit')
+    @ApiOperation({summary:''})
+    @ApiResponse({ status: 201})
+    private async deleteUnit(
+        @Body() body:any
+    ){
+        return await this.project.deleteUnit(body.id,body.user_id);
     }
 }
 

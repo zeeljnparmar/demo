@@ -22,22 +22,22 @@ export class Bookings {
   @Column({name:'duration',default:'1'})
   duration:number
 
-  @Column({name:'email'})
+  @Column({name:'email',nullable:true})
   email:string
 
-  @Column({name:'budget'})
+  @Column({name:'budget',nullable:true})
   budget:number
 
-  @Column({name:'area'})
+  @Column({name:'area',nullable:true})
   area:string
 
-  @Column({name:'category'})
+  @Column({name:'category',nullable:true})
   category:string;
 
   @Column({name:'tenant',default:'AHM001'})
   teant:string;
 
-  @Column({ name: 'is_Active', nullable:false,default:true})
+  @Column({ name: 'is_Active',default:true})
   is_Active: boolean;
 
   @ManyToOne(() => User, (user) => user.bookings)

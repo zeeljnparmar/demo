@@ -33,21 +33,36 @@ export class unitDto{
     @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
     unit_size:string
 
-    @ApiProperty()    
+    @ApiProperty({default:true})    
     isactive:boolean
 
-    @ApiProperty()
-    @IsOptional()
-    user_id?:string
-
-    @ApiProperty()
+    @ApiProperty({default:'sale'})
     @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
     status:string
 
+} 
+
+export class insertunit{
+
     @ApiProperty()
     @IsOptional()
-    property_id?:string
-} 
+    property_id?:number
+
+    @ApiProperty({default:'AMH0001'})
+    @IsOptional()
+    tenant:string   
+
+    @ApiProperty()
+    @IsOptional()
+    user_id?:number
+
+
+    @ApiProperty()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => unitDto)
+    units: unitDto[];
+}
 export class projectDto {
 
     @ApiProperty({nullable:false})
@@ -74,8 +89,8 @@ export class projectDto {
     tenant:string
 }  
 
-export class insertUnits {
-
+export class insertProject {
+    attributes
     @ApiProperty({nullable:false})
     @IsString()
     @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))

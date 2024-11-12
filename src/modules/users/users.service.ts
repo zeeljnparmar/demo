@@ -5,7 +5,7 @@ import {userDto} from '../../dtos/user.dto'
 import {userCheckService} from './user.check'
 import * as bcrypt from 'bcrypt';
 import {JwtService} from "@nestjs/jwt";
-import {jwt} from '../../constants/constants'
+import * as res from '../../constants/constants'
 import { AppService } from 'src/app.service';
 
 @Injectable()
@@ -101,7 +101,7 @@ export class UsersService {
             return 'NO Password Error'
         }
         let data= await this.userDatasource.manager.query(`
-            select password,isapproved,id,name,rera,designation from public.user
+            select password,isapproved,id,name,rera,designation,tenant from public.user
             where name = $1 
             or email =  $2 
             or contact = $3
@@ -112,8 +112,8 @@ export class UsersService {
         if( await bcrypt.compare(req.password,data[0].password) && data[0].isapproved===true){
             delete data[0].password;
             delete data[0].isapproved;
-            return this.service.sendResponse(201,'user Found',await this.jwtService.signAsync(data[0],{secret:jwt}))
+            return this.service.sendResponse(201,res.success,await this.jwtService.signAsync(data[0],{secret:res.jwt}))
         }
-        return this.service.sendResponse(200,'user UnAuthorized')
+        return this.service.sendResponse(401,res.Unauthorized)
     }
 }

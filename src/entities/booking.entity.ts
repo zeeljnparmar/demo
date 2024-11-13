@@ -8,18 +8,18 @@ export class Bookings {
   id: number;
 
   @Column()
-  bookingDate: Date;
+  bookingdate: string;
 
   @Column({name:'remarks',default:'inquiry remarks'})
   remarks: string;
 
   @Column({name:'create_at'})
-  created_at:Date
+  create_at:Date
 
   @Column({name:'customer'})
   customer:string;
 
-  @Column({name:'duration',default:'1'})
+  @Column({name:'duration',default:1})
   duration:number
 
   @Column({name:'email',nullable:true})
@@ -37,8 +37,8 @@ export class Bookings {
   @Column({name:'tenant',default:'AHM001'})
   teant:string;
 
-  @Column({ name: 'is_Active',default:true})
-  is_Active: boolean;
+  @Column({ name: 'is_active',default:true})
+  is_active: boolean;
 
   @ManyToOne(() => User, (user) => user.bookings)
   @JoinColumn({ name: 'user_id' })

@@ -16,6 +16,8 @@ export class ProjectController {
 
     //?=================for User===========================//
     @Post('view-all')
+    @ApiOperation({ summary: '' })
+    @ApiResponse({ status: 201, type: 'abcd' })
     private async viewAll(){
         return await this.project.viewAllProject();
     }

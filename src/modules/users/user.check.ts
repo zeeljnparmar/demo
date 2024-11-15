@@ -23,7 +23,7 @@ export class userCheckService{
         }
         return 'success'
     }
-    async checById(id:number){
+    async checkById(id:number){
         let user = await this.userDatasource.manager.query(`
                 select designation from public.user where id=$1  
         `,[id]);

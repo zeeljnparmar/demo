@@ -20,7 +20,7 @@ export class BookingsService {
     async bookUnit(data: BookUnits) {
 
         //Checking User Authentication
-        let user = await this.userCheck.checById(data.user_id);
+        let user = await this.userCheck.checkById(data.user_id);
         if (user == 'user not found') {
             return this.service.sendResponse(401, 'Unauthorized user');
         }
@@ -125,6 +125,32 @@ export class BookingsService {
         else{return await this.service.sendResponse(201, 'Unit Booked Successfully')}
     }
     async viewAllBookingAdmin(user_id:any,teant:any){
-        
+        let user= await this.userCheck.checkById(user_id);
+        if(user!='Super Admin'){
+            return this.service.sendResponse(401,'Unauthorized user');
+        }
+        let data = await this.Datasource.manager.query(`
+                select * from bookings where tenant = $1
+            `
+        ,[teant]);
+        if(data.length==0){
+            return this.service.sendResponse(412,'No data to Show');
+        }
+        return data;
+    }
+    async viewBooking(user_id:any,teant:any){
+        let user= await this.userCheck.checkById(user_id);
+        if(!user){
+            return this.service.sendResponse(401,'Unauthorized user');
+        }
+        let data = await this.Datasource.manager.query(
+            `select * from bookings 
+            where tenant = $1
+            and user_id =$2`
+        ,[teant,user_id]);
+        if(data.length==0){
+            return this.service.sendResponse(412,'No data to Show');
+        }
+        return data;        
     }
 }

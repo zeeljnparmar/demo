@@ -21,11 +21,11 @@ export class ProjectController {
     private async viewAll(){
         return await this.project.viewAllProject();
     }
-    @Post('view')
+    @Post('view-units')
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
     private async viewProject(@Body() body){
-        return await this.project.viewAProject(body.id);
+        return await this.project.viewAProject(body);
     }
     //?=================for Admin===========================//
     @Post('create')

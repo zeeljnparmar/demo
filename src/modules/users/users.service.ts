@@ -116,4 +116,35 @@ export class UsersService {
         }
         return this.service.sendResponse(401,res.Unauthorized)
     }
+    async viewPending(user_id:number,tenant:string){
+        let user = await this.userCheck.checkById(user_id);        
+        if(user=='Super Admin' || user=='Admin'){
+            try{
+                let pending=await this.userDatasource.manager.query(
+                    `select * from public.user where isapproved= false and tenant='${tenant}'`
+                )
+                return await this.service.sendResponse(200,pending);
+            }catch(error){
+                return await this.service.sendResponse(400,res.unexpexted);
+            }
+        } 
+        return await this.service.sendResponse(404,res.Unauthorized);
+    }
+    async approvePending(id:number,user_id:number,tenant:string){
+        let user = await this.userCheck.checkById(user_id);        
+        if(user=='Super Admin' || user=='Admin'){
+            try{
+                let pending=await this.userDatasource.manager.query(
+                    `update public.user
+                    set isapproved= true
+                    where id = ${id} 
+                    and tenant='${tenant}'`
+                )
+                return await this.service.sendResponse(200,pending);
+            }catch(error){
+                return await this.service.sendResponse(400,res.unexpexted);
+            }
+        } 
+        return await this.service.sendResponse(404,res.Unauthorized);
+    }
 }

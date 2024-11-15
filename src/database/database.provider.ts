@@ -14,6 +14,6 @@ export const nestpractice:TypeOrmModuleOptions={
     password:DB_PASSWORD,
     database:'postgres',
     synchronize:true,
-    logging:true,
+    logging:false,
     entities:[User,Property,Units,Bookings]
 }

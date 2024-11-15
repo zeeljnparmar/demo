@@ -15,6 +15,9 @@ export class userInterceptor implements NestInterceptor {
 
     async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
         const request = context.switchToHttp().getRequest();
+        if(request.path==='/users/login'){
+            return next.handle().pipe(tap(() => { }))
+        }
         let token = request.cookies.token
         let decoded= await this.jwtService.verifyAsync(token,{ secret: jwt})
         if(decoded.designation==='Admin' || decoded.designation==='Super Admin'){

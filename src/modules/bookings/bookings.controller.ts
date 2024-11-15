@@ -25,20 +25,20 @@ export class BookingsController {
         body.created_at=d;
         return await this.boking.bookUnit(body);
     }
-    @Post('view')
+    @Post('view-all')
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
     private async viewProject(@Body() body){
-        return 0;
+        return await this.boking.viewAllBookingAdmin(body.user_id,body.tenant);
     }
     //?=================for Admin===========================//
-    @Post('create')
+    @Post('view')
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
     private async createProject(
-        @Body() body:projectDto,
+        @Body() body,
     ){
-        return 0;
+        return await this.boking.viewBooking(body.user_id,body.tenant);
     }
     @Post('insert-unit')
     @ApiOperation({ summary: '' })

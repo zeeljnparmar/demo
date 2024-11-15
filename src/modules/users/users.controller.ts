@@ -1,11 +1,13 @@
-import { Controller,Get,Post,Body, UseGuards, Res, Req} from '@nestjs/common';
+import { Controller,Get,Post,Body, UseGuards, Res, Req, UseInterceptors} from '@nestjs/common';
 import {UsersService} from './users.service'
 import {userDto} from '../../dtos/user.dto'
 import {  ApiOperation, ApiResponse, ApiHeader, ApiTags } from '@nestjs/swagger';
 import {Response, Request} from 'express';
+import { userInterceptor } from '../validations/user.interceptor';
 
 @ApiTags('Users')
 @Controller('users')
+@UseInterceptors(userInterceptor)
 export class UsersController {
     constructor(
         private readonly userService:UsersService
@@ -56,7 +58,13 @@ export class UsersController {
     private async getSingle(
         @Body() body:any
     ):Promise<any>{
-        const res= this.userService.getSingleUser(body);
+        const res= await this.userService.getSingleUser(body);
         return res;
+    }
+    @Get('pending-approvals')
+    @ApiOperation({summary:''})
+    @ApiResponse({ status: 201, type: 'abcd' })
+    private async viewpending(@Body() body:any) {
+        return await this.userService.viewPending(body.user_id,body.tenant)
     }
 }

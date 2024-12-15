@@ -4,7 +4,6 @@ import {userDto} from '../../dtos/user.dto'
 import {  ApiOperation, ApiResponse, ApiHeader, ApiTags } from '@nestjs/swagger';
 import {Response, Request} from 'express';
 import { userInterceptor } from '../validations/user.interceptor';
-
 @ApiTags('Users')
 @Controller('users')
 @UseInterceptors(userInterceptor)
@@ -46,9 +45,8 @@ export class UsersController {
     // @UseGuards(AuthorizationGuard)
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
-    private async getAllUsers(@Req() request:Request):Promise<any>{
-        
-        const res=this.userService.getAllUsers();
+    private async getAllUsers(@Body() body:any):Promise<any>{
+        const res=this.userService.getAllUsers(body.tenant,body.user_id);
         return res;
     }
 
@@ -61,10 +59,22 @@ export class UsersController {
         const res= await this.userService.getSingleUser(body);
         return res;
     }
-    @Get('pending-approvals')
+    @Get('get-pending-approvals')
     @ApiOperation({summary:''})
     @ApiResponse({ status: 201, type: 'abcd' })
     private async viewpending(@Body() body:any) {
         return await this.userService.viewPending(body.user_id,body.tenant)
+    }
+
+    @Post('deactivate-user')
+    @ApiOperation({summary:''})
+    @ApiResponse({ status: 201, type: 'abcd' })
+    private async deleteUser(@Body() body:any){
+        try {
+            return await this.userService.deleteuser(body.id,body.user_id,body.tenant);
+        } catch (error) {
+            console.log(error)
+            return 'Internal error has occured'
+        }
     }
 }

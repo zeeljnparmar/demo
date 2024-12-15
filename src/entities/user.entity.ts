@@ -42,6 +42,9 @@ export class User {
   @Column({name:'tenant',default:'AHM001'})
   teant:string;
 
+  @Column({name:'status',default:'true'})
+  status:boolean;
+
   @OneToMany(() => Property, (property) => property.user)
   properties: Property[];
 

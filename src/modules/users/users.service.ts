@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager, QueryRunner } from 'typeorm';
-import {userDto} from '../../dtos/user.dto'
-import {userCheckService} from './user.check'
+import { userDto } from '../../dtos/user.dto'
+import { userCheckService } from './user.check'
 import * as bcrypt from 'bcrypt';
-import {JwtService} from "@nestjs/jwt";
+import { JwtService } from "@nestjs/jwt";
 import * as res from '../../constants/constants'
 import { AppService } from 'src/app.service';
 
@@ -12,7 +12,7 @@ import { AppService } from 'src/app.service';
 export class UsersService {
     constructor(
         @InjectDataSource('database')
-        private readonly userDatasource:DataSource,
+        private readonly userDatasource: DataSource,
 
         @Inject(forwardRef(() => userCheckService))
         private userCheck: userCheckService,
@@ -21,22 +21,22 @@ export class UsersService {
         private service: AppService,
 
         private jwtService: JwtService
-    ){}
+    ) { }
 
-    async getAllUsers():Promise<any>{
+    async getAllUsers(tenant: string, user_id: number): Promise<any> {
+        // let user = await this.userCheck.checkById(user_id);        
         let data = await this.userDatasource.manager.query(`select * from public.user`);
         return data;
     }
-
-    async createUser(user: userDto):Promise<any>{
+    async createUser(user: userDto): Promise<any> {
 
         //? Validating user data
-        let check = await this.userCheck.checkUserDetails(user.name,user.email,user.contact,user.rera);
-        if (check==='error'){
+        let check = await this.userCheck.checkUserDetails(user.name, user.email, user.contact, user.rera);
+        if (check === 'error') {
             return 'user already Exists';
         }
         try {
-            let hashed = await bcrypt.hash(user.password,10);
+            let hashed = await bcrypt.hash(user.password, 10);
             await this.userDatasource.manager.query(
                 `insert into public.user
                 (
@@ -55,96 +55,104 @@ export class UsersService {
                 )`
             )
             return {
-                status:201,
-                message:'User Created Successfully'
+                status: 201,
+                message: 'User Created Successfully'
             }
         } catch (error) {
             console.log(error);
-            return{
-                status:200,
-                message:'Unexpected Error has occured'
-            }                        
+            return {
+                status: 200,
+                message: 'Unexpected Error has occured'
+            }
         }
     }
-
-    async getSingleUser(req:any){
+    async getSingleUser(req: any) {
         try {
-            let data= await this.userDatasource.manager.query(`
+            let data = await this.userDatasource.manager.query(`
                 select * from public.user
                 where name ~*$1 
                 or email ~* $2 
                 or id = $3
                 or company ~* $4  
-            `,[req.name,req.email,req.id,req.company])
-            if(data.length==0){
-                return{
-                    status:200,
-                    message:"Data Not found"
+            `, [req.name, req.email, req.id, req.company])
+            if (data.length == 0) {
+                return {
+                    status: 200,
+                    message: "Data Not found"
                 }
             }
             return {
-                status:200,
-                data:data,
-                message:"User found"
+                status: 200,
+                data: data,
+                message: "User found"
             }
         } catch (error) {
             return {
-                status:201,
-                message:error
-                
+                status: 201,
+                message: error
+
             }
         }
     }
-
-    async login(req:any){
-        if(!req.password){
+    async login(req: any) {
+        if (!req.password) {
             return 'NO Password Error'
         }
-        let data= await this.userDatasource.manager.query(`
+        let data = await this.userDatasource.manager.query(`
             select password,isapproved,id,name,rera,designation,tenant from public.user
             where name = $1 
             or email =  $2 
             or contact = $3
-        `,[req.name,req.email,req.number])
-        if(data.length===0){
-            return this.service.sendResponse(400,'user Not found')
+        `, [req.name, req.email, req.number])
+        if (data.length === 0) {
+            return this.service.sendResponse(400, 'user Not found')
         }
-        if( await bcrypt.compare(req.password,data[0].password) && data[0].isapproved===true){
+        if (await bcrypt.compare(req.password, data[0].password) && data[0].isapproved === true) {
             delete data[0].password;
             delete data[0].isapproved;
-            return this.service.sendResponse(201,res.success,await this.jwtService.signAsync(data[0],{secret:res.jwt}))
+            return this.service.sendResponse(201, res.success, await this.jwtService.signAsync(data[0], { secret: res.jwt }))
         }
-        return this.service.sendResponse(401,res.Unauthorized)
+        return this.service.sendResponse(401, res.Unauthorized)
     }
-    async viewPending(user_id:number,tenant:string){
-        let user = await this.userCheck.checkById(user_id);        
-        if(user=='Super Admin' || user=='Admin'){
-            try{
-                let pending=await this.userDatasource.manager.query(
-                    `select * from public.user where isapproved= false and tenant='${tenant}'`
-                )
-                return await this.service.sendResponse(200,pending);
-            }catch(error){
-                return await this.service.sendResponse(400,res.unexpexted);
+    async viewPending(user_id: number, tenant: string) {
+        try {
+            let pending = await this.userDatasource.manager.query(
+                `select * from public.user where isapproved= false and tenant='${tenant}'`
+            )
+            return await this.service.sendResponse(200, pending);
+        } catch (error) {
+            return await this.service.sendResponse(400, res.unexpexted);
+        }
+    }
+    async approvePending(id: number, user_id: number, tenant: string) {
+        try {
+            let check = await this.userCheck.checkById(id);
+            if (check!=='Brooker'){
+                return await this.service.sendResponse(400, res.unexpexted);
             }
-        } 
-        return await this.service.sendResponse(404,res.Unauthorized);
-    }
-    async approvePending(id:number,user_id:number,tenant:string){
-        let user = await this.userCheck.checkById(user_id);        
-        if(user=='Super Admin' || user=='Admin'){
-            try{
-                let pending=await this.userDatasource.manager.query(
-                    `update public.user
+            let pending = await this.userDatasource.manager.query(
+                `update public.user
                     set isapproved= true
                     where id = ${id} 
                     and tenant='${tenant}'`
+            )
+            return await this.service.sendResponse(200, pending);
+        } catch (error) {
+            return await this.service.sendResponse(400, res.unexpexted);
+        }
+    }
+    async deleteuser(id: number, user_id: number, tenant: string) {
+            try {
+                let pending = await this.userDatasource.manager.query(
+                    `update public.user
+                    set isapproved= flase 
+                    and status = flase
+                    where id = ${id} 
+                    and tenant='${tenant}'`
                 )
-                return await this.service.sendResponse(200,pending);
-            }catch(error){
-                return await this.service.sendResponse(400,res.unexpexted);
+                return await this.service.sendResponse(200, pending);
+            } catch (error) {
+                return await this.service.sendResponse(400, res.unexpexted);
             }
-        } 
-        return await this.service.sendResponse(404,res.Unauthorized);
     }
 }

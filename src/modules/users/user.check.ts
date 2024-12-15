@@ -15,7 +15,8 @@ export class userCheckService{
             `Select * from public.user
             where name = $1
             or email =$2
-            or contact = $3`,
+            or contact = $3
+            and status = 'true'`,
             [name,email,contact]
         )
         if(user.length>0){

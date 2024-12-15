@@ -37,7 +37,6 @@ export class UsersController {
         @Body() user:userDto,
         
     ):Promise<any>{ 
-        
         return await this.userService.createUser(user);
     }
 
@@ -66,6 +65,17 @@ export class UsersController {
         return await this.userService.viewPending(body.user_id,body.tenant)
     }
 
+    @Post('approve-user')
+    @ApiOperation({summary:''})
+    @ApiResponse({ status: 201, type: 'abcd' })
+    private async approveUser(@Body() body:any){
+        try {
+            return await this.userService.approvePending(body.id,body.user_id,body.tenant);
+        } catch (error) {
+            console.log(error)
+            return 'Internal error has occured'
+        }
+    }
     @Post('deactivate-user')
     @ApiOperation({summary:''})
     @ApiResponse({ status: 201, type: 'abcd' })

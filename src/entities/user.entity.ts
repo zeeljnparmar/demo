@@ -1,4 +1,4 @@
-import { Entity,Column,PrimaryGeneratedColumn,OneToMany} from 'typeorm';
+import { Entity,Column,PrimaryGeneratedColumn,OneToMany, NumericType} from 'typeorm';
 import {Property} from './property.entity'
 import { Units } from './unit.entity'; 
 import { Bookings } from './booking.entity';
@@ -15,8 +15,8 @@ export class User {
   @Column({ name: 'email', nullable:false , unique:true})
   email: string;
 
-  @Column({ name: 'contact', nullable:false ,unique:true})
-  contact: number;
+  @Column({type: 'bigint',unique:true})
+  contact: string;
 
   @Column({ name: 'gender', nullable:false })
   gender: string;

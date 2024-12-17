@@ -127,7 +127,8 @@ export class UsersService {
     async approvePending(id: number, user_id: number, tenant: string) {
         try {
             let check = await this.userCheck.checkById(id);
-            if (check!=='Brooker'){
+            console.log(check)
+            if (check==='Brooker'){
                 return await this.service.sendResponse(400, res.unexpexted);
             }
             let pending = await this.userDatasource.manager.query(
@@ -136,7 +137,7 @@ export class UsersService {
                     where id = ${id} 
                     and tenant='${tenant}'`
             )
-            return await this.service.sendResponse(200, pending);
+            return await this.service.sendResponse(200, res.success);
         } catch (error) {
             return await this.service.sendResponse(400, res.unexpexted);
         }

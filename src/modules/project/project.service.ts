@@ -31,7 +31,7 @@ export class ProjectService {
         }
         return this.service.sendResponse(201, res.notFound)
     }
-    async viewAProject(req) {
+    async viewAllProjectunits(req) {
         await this.updateWhileRender(req.tenant);
         try {
             let data = await this.Datasource.manager.query(`
@@ -160,7 +160,7 @@ export class ProjectService {
             const current = new Date(d).getTime();
             for (let i = 0; i < units.length; i++) {
                 const diff = current - units[i].create_at;
-                const hours = diff / (1000 * 60 * 60);
+                const hours = diff / (1000 * 60 * 60); //  24 hours
                 if (hours > 0) {
                     let res = await this.Datasource.manager.query(`
                         update units

@@ -11,7 +11,7 @@ export const nestpractice:TypeOrmModuleOptions={
     type:'postgres',
     database:'postgres',
     synchronize:true,
-    logging:true,
+    // logging:true,
     entities:[User,Property,Units,Bookings],
 
 }

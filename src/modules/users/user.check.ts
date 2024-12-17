@@ -10,7 +10,7 @@ export class userCheckService{
         private readonly userDatasource:DataSource
     ){}
 
-    async checkUserDetails(name:string,email:string,contact:number,rera:string){
+    async checkUserDetails(name:string,email:string,contact:string,rera:string){
         let user = await this.userDatasource.manager.query(
             `Select * from public.user
             where name = $1

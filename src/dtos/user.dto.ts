@@ -19,9 +19,9 @@ export class userDto {
     @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))  
     email: string
 
-    @ApiProperty({nullable:false})
+    @ApiProperty()
     @IsNumber()
-    contact : number
+    contact : string
     
     @ApiProperty({nullable:false})
     @IsString()

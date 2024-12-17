@@ -21,12 +21,15 @@ export class ProjectController {
     private async viewAll(){
         return await this.project.viewAllProject();
     }
-    @Post('view-units')
+
+    //? For all units of a project 
+    @Post('view-all-units')
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
     private async viewProject(@Body() body){
-        return await this.project.viewAProject(body);
+        return await this.project.viewAllProjectunits(body);
     }
+
     //?=================for Admin===========================//
     @Post('create')
     @ApiOperation({ summary: '' })

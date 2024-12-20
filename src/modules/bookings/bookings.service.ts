@@ -153,4 +153,21 @@ export class BookingsService {
         }
         return data;        
     }
+    async viewaBooking(unit_id:number,user_id:any,teant:any){
+        let user= await this.userCheck.checkById(user_id);
+        if(!user){
+            return this.service.sendResponse(401,'Unauthorized user');
+        }
+        let data = await this.Datasource.manager.query(
+            `select * from bookings 
+            where tenant = $1
+            and user_id =$2
+            and unit_id =$3`
+        ,[teant,user_id,unit_id]);
+        if(data.length==0){
+            return this.service.sendResponse(412,'No data to Show');
+        }
+        return data;        
+    }
 }
+

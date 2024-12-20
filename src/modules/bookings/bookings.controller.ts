@@ -28,14 +28,22 @@ export class BookingsController {
     @Post('view-all')
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
-    private async viewProject(@Body() body){
+    private async viewAllBooking(@Body() body){
         return await this.boking.viewAllBookingAdmin(body.user_id,body.tenant);
     }
     //?=================for Admin===========================//
     @Post('view')
     @ApiOperation({ summary: '' })
     @ApiResponse({ status: 201, type: 'abcd' })
-    private async createProject(
+    private async viewUserBooking(
+        @Body() body,
+    ){
+        return await this.boking.viewBooking(body.user_id,body.tenant);
+    }
+    @Post('view-a-booking')
+    @ApiOperation({ summary: '' })
+    @ApiResponse({ status: 201, type: 'abcd' })
+    private async viewBooking(
         @Body() body,
     ){
         return await this.boking.viewBooking(body.user_id,body.tenant);

@@ -43,4 +43,6 @@ export class BookUnits{
     user_id:number
     @ApiProperty()
     unit_id:number
+    @ApiProperty()
+    property_id:number
 }

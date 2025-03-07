@@ -11,12 +11,12 @@ export class userDto {
 
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Name Must not contain any special characters"}))
     name:string
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))  
+    @Matches(ALPHANUMERIC_REGEX,({message:"email Must not contain any special characters"}))  
     email: string
 
     @ApiProperty()
@@ -25,32 +25,32 @@ export class userDto {
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Gender Must not contain any special characters"}))
     gender: string
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Address Must not contain any special characters"}))
     address: string
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Rera Must not contain any special characters"}))
     rera: string
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Company name Must not contain any special characters"}))
     company: string
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Password Must not contain any special characters"}))
     password: string
     
     @ApiProperty({nullable:false})
     @IsString()
-    @Matches(ALPHANUMERIC_REGEX,({message:"Must not contain any special characters"}))
+    @Matches(ALPHANUMERIC_REGEX,({message:"Designation Must not contain any special characters"}))
     designation : string
 
 }

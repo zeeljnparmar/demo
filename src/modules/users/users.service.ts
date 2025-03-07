@@ -126,8 +126,7 @@ export class UsersService {
     }
     async approvePending(id: number, user_id: number, tenant: string) {
         try {
-            let check = await this.userCheck.checkById(id);
-            console.log(check)
+            let check = await this.userCheck.checkById(user_id);
             if (check==='Brooker'){
                 return await this.service.sendResponse(400, res.unexpexted);
             }
@@ -146,12 +145,11 @@ export class UsersService {
             try {
                 let pending = await this.userDatasource.manager.query(
                     `update public.user
-                    set isapproved= flase 
-                    and status = flase
+                    set isapproved= false ,status = false
                     where id = ${id} 
                     and tenant='${tenant}'`
                 )
-                return await this.service.sendResponse(200, pending);
+                return await this.service.sendResponse(200, res.success);
             } catch (error) {
                 return await this.service.sendResponse(400, res.unexpexted);
             }

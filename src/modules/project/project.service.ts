@@ -5,7 +5,7 @@ import { userCheckService } from '../users/user.check';
 import { AppService } from '../../app.service'
 import { insertunit } from 'src/dtos/project.dto';
 import * as res from 'src/constants/constants';
-
+import * as excel from 'exceljs';
 @Injectable()
 export class ProjectService {
     constructor(
@@ -38,6 +38,7 @@ export class ProjectService {
                 Select * from units 
                 where property_id = ${req.id}
                 and isactive = 'true'
+                order by id asc
             `);
             return await this.service.sendResponse(200, res.success, data);
         } catch (error) {
@@ -68,6 +69,24 @@ export class ProjectService {
         if (user === 'Super Admin' || user === 'Admin') {
             try {
                 for (let i = 0; i < data.units.length; i++) {
+                    let check = await this.Datasource.manager.query(`
+                        select id 
+                        from units 
+                        where block = $1 
+                        and floor=$2
+                        and unit_no = $3
+                        and user_id = $4
+                        and tenant=$5
+                        and property_id=$6
+                    `,[ 
+                        data.units[i].block,//1
+                        data.units[i].floor,//2
+                        data.units[i].unit_no,//3
+                        data.user_id,//4            
+                        data.tenant,//5
+                        data.property_id//6
+                    ])
+                    if(check.length>0){return await this.service.sendResponse(201, `Same Unit already exists`)}
                     let res = await this.Datasource.manager.query(`     
                         insert into units
                         (
@@ -159,18 +178,31 @@ export class ProjectService {
         if (units) {
             const current = new Date(d).getTime();
             for (let i = 0; i < units.length; i++) {
-                const diff = current - units[i].create_at;
-                const hours = diff / (1000 * 60 * 60); //  24 hours
-                if (hours > 0) {
+                const diff = current - units[i].create_at;                
+                const hours = diff / (1000 * 60 * 60); // converting time into hours
+                if (hours > 48.00) {
                     let res = await this.Datasource.manager.query(`
                         update units
                         set isactive = true
                         where id = ${units[i].unit_id}
                         and tenant = '${tenant}'
                     `)
+                    let book = await this.Datasource.manager.query(`
+                        update booking
+                        set isactive = false
+                        where unit_id = ${units[i].unit_id}
+                        and tenant = '${tenant}'
+                    `)
                 }
             }
         }
         return 'success';
+    }
+    async generatetemplate(){
+        const workbook = new excel.Workbook()
+        const worksheet = workbook.addWorksheet(`Pricing`)
+        worksheet.getCell(1,1).value= 'hello'
+        await workbook.xlsx.writeFile(`templete.xlsx`)
+        return 'success'
     }
 }

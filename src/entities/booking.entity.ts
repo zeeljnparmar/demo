@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Units } from './unit.entity';
+import { Property } from './property.entity';
 
 @Entity('bookings')
 export class Bookings {
@@ -47,4 +48,8 @@ export class Bookings {
   @ManyToOne(() => Units, (units) => units.bookings)
   @JoinColumn({ name: 'unit_id' })
   unit: Units;
+
+  @ManyToOne(() => Property, (property) => property.bookings)
+  @JoinColumn({ name: 'property_id' })
+  property: Property;
 }

@@ -8,7 +8,7 @@ import { ppid } from 'process';
 
 @ApiTags('Projects')
 @Controller('project')
-@UseInterceptors(userInterceptor)
+// @UseInterceptors(userInterceptor)
 export class ProjectController {
     constructor(
         private readonly project:ProjectService
@@ -62,6 +62,13 @@ export class ProjectController {
         @Body() body:any
     ){
         return await this.project.deleteUnit(body.id,body.user_id);
+    }
+    @Post(`generate-template`)
+    @ApiOperation({summary:''})
+    @ApiResponse({ status: 201})
+    private async generate()
+    {
+        return await this.project.generatetemplate()
     }
 }
 

@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn ,ManyToOne, OneToOne, JoinColumn, OneToMany, DeleteDateColumn ,CreateDateColumn, UpdateDateColumn} from 'typeorm';
 import {User} from  './user.entity'
 import { Units } from './unit.entity';
+import { Bookings } from './booking.entity';
 
 
 @Entity()
@@ -31,4 +32,7 @@ export class Property {
   @OneToMany(() => Units, (units) => units.property)
   units: Units[];
 
+  @OneToMany(() => Bookings, (bookings) => bookings.unit)
+  bookings: Bookings[];
+  
 }

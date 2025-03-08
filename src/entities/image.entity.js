@@ -1,26 +1,37 @@
-const { EntitySchema } = require("typeorm");
+const { EntitySchema } = require('typeorm');
 
 module.exports = new EntitySchema({
-    name: "Image",
-    tableName: "images",
+    name: 'Image',
+    tableName: 'images',
     columns: {
         id: {
             primary: true,
-            type: "int",
-            generated: true,
+            type: 'uuid',
+            generated: 'uuid',
         },
-        product_name: {  // Changed to lowercase
-            type: "varchar",
+        request_id: {
+            type: 'uuid',
+            nullable: false,
         },
-        input_url: {  // Changed to lowercase
-            type: "text",
+        input_url: {
+            type: 'text',
+            nullable: false,
         },
-        output_url: {  // Changed to lowercase
-            type: "text",
+        output_url: {
+            type: 'text',
             nullable: true,
         },
-        request_id: {  // Changed to lowercase
-            type: "uuid",
+        status: {
+            type: 'varchar',
+            default: 'Pending',
         },
     },
+    relations: {
+        request: {
+            target: 'Request',
+            type: 'many-to-one',
+            joinColumn: { name: 'request_id' },
+            onDelete: 'CASCADE',
+        }
+    }
 });

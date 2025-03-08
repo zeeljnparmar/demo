@@ -20,7 +20,7 @@ const processCSV = async (csvContent) => {
             "processing",
         ]);
 
-        const rows = csvContent.split("\n").slice(1); // Skip header
+        const rows = csvContent.split("\n").slice(1);
         for (const row of rows) {
             if (!row) continue;
             const [serial, product, ...urls] = row.split(",");
@@ -30,12 +30,10 @@ const processCSV = async (csvContent) => {
 
                 // Insert into images table using TypeORM's getRepository (lowercase columns)
                 await AppDataSource.getRepository("Image").save({
-                    product_name: product,  // Lowercase
-                    input_url: inputUrl,  // Lowercase
-                    request_id: requestId,  // Lowercase
+                    product_name: product, 
+                    input_url: inputUrl,  
+                    request_id: requestId,
                 });
-
-                // Add to BullMQ queue for processing
                 await imageQueue.add("compress", { requestId, product, inputUrl });
             }
         }

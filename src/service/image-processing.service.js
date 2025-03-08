@@ -4,9 +4,18 @@ const fs = require("fs");
 const path = require("path");
 const { AppDataSource } = require("../config/database");
 const { Parser } = require("json2csv");
+const {triggerWebhook} =require('../service/webhook.trigger')
 
 const processedDir = path.join(__dirname, "../../processed");
 const outputDir = path.join(__dirname, "../../output");
+
+AppDataSource.initialize()
+    .then(() => {
+        console.log('Data Source has been initialized!');
+    })
+    .catch((err) => {
+        console.error('Error during Data Source initialization:', err);
+    });
 
 // Ensure directories exist
 if (!fs.existsSync(processedDir)) fs.mkdirSync(processedDir, { recursive: true });
@@ -14,7 +23,7 @@ if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
 // Function to generate CSV
 async function generateCSV(requestId) {
-    console.log(`📄 Generating CSV for Request ID: ${requestId}`);
+
 
     const records = await AppDataSource.query(
         `SELECT request_id, product_name, input_url, output_url FROM images WHERE request_id = $1`,
@@ -22,7 +31,7 @@ async function generateCSV(requestId) {
     );
 
     if (!records.length) {
-        console.log(`⚠️ No records found for Request ID: ${requestId}`);
+        console.log(`No records found for Request ID: ${requestId}`);
         return;
     }
 
@@ -51,54 +60,78 @@ async function generateCSV(requestId) {
     const csvPath = path.join(outputDir, `output-${requestId}.csv`);
     fs.writeFileSync(csvPath, csv);
 
-    console.log(`✅ CSV saved: ${csvPath}`);
 }
+const fetchWithTimeout = (url, timeout = 5000) => {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(`Timeout: Failed to fetch ${url} within ${timeout}ms`)), timeout);
 
-// BullMQ Worker
+        axios({ url, responseType: 'arraybuffer' })
+            .then((response) => {
+                clearTimeout(timer); // Clear timeout if successful
+                resolve(response);
+            })
+            .catch((error) => {
+                clearTimeout(timer); // Clear timeout if an error occurs
+                reject(error);
+            });
+    });
+};
+
+// Add a map to track waiting clients
+const waitingClients = new Map();
+
 new Worker(
     "image-processing",
     async (job) => {
         const { requestId, product, inputUrl } = job.data;
         const outputPath = path.join(processedDir, `${product}-${Date.now()}.jpg`);
+        await new Promise((resolve) => setTimeout(resolve, 20000));
 
         try {
-            console.log(`📥 Fetching image: ${inputUrl}`);
 
-            // Fetch image from URL
-            const response = await axios({ url: inputUrl, responseType: "arraybuffer" });
+            const response = await fetchWithTimeout(inputUrl, 5000); 
             const imageBuffer = Buffer.from(response.data);
 
-            console.log(`🛠️ Processing image...`);
-            fs.writeFileSync(outputPath, imageBuffer); // Simulated processing
+            fs.writeFileSync(outputPath, imageBuffer);
 
-            console.log(`✅ Image processed: ${outputPath}`);
-
-            // Update database with output image URL
             await AppDataSource.query(
                 `UPDATE images SET output_url = $1 WHERE input_url = $2 AND request_id = $3`,
                 [outputPath, inputUrl, requestId]
             );
 
-            // Check if all images for the request are processed
             const pending = await AppDataSource.query(
                 `SELECT COUNT(*) FROM images WHERE request_id = $1 AND output_url IS NULL`,
                 [requestId]
             );
 
             if (parseInt(pending[0].count) === 0) {
-                await AppDataSource.query(`UPDATE requests SET status = 'completed' WHERE id = $1`, [
-                    requestId,
-                ]);
-                console.log(`🎉 All images processed for Request ID: ${requestId}`);
+                await AppDataSource.query(
+                    `UPDATE requests SET status = 'completed' WHERE id = $1`, 
+                    [requestId]
+                );
+                // Notify waiting clients
+                if (waitingClients.has(requestId)) {
+                    waitingClients.get(requestId).forEach(client => {
+                        client.res.json({ requestId, status: 'completed' });
+                    });
+                    waitingClients.delete(requestId);
+                }
+                await triggerWebhook({ requestId, status: 'completed' });
 
-                // Generate CSV
                 await generateCSV(requestId);
             }
         } catch (error) {
-            console.error(`❌ Error processing image: ${inputUrl}`, error);
+            console.error(`Error processing image: ${inputUrl}`, error);
             await AppDataSource.query(`UPDATE requests SET status = 'failed' WHERE id = $1`, [
                 requestId,
             ]);
+            // Notify waiting clients about failure
+            if (waitingClients.has(requestId)) {
+                waitingClients.get(requestId).forEach(client => {
+                    client.res.json({ requestId, status: 'failed' });
+                });
+                waitingClients.delete(requestId);
+            }
         }
     },
     {
